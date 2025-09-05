@@ -14,7 +14,6 @@ $db_password = ""; // your DB password
 $dbname = "parcel_delivery"; // change if needed
 
 $conn = new mysqli($host, $username, $db_password, $dbname);
-
 if ($conn->connect_error) {
     die("Database connection failed!");
 }
@@ -38,27 +37,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (empty($recipient_name) || strlen($recipient_name) < 3) {
         $errors[] = "Recipient name must be at least 3 characters.";
     }
-
     if (!preg_match("/^[0-9]{10,15}$/", $recipient_phone)) {
         $errors[] = "Invalid phone number (must be 10-15 digits).";
     }
-
     if (empty($parcelName)) {
         $errors[] = "Parcel name is required.";
     }
-
     if (!is_numeric($weight) || $weight <= 0) {
         $errors[] = "Weight must be a positive number.";
     }
-
     if (!is_numeric($amount) || $amount < 0) {
         $errors[] = "Amount must be a non-negative number.";
     }
-
     if (empty($pickup_address)) {
         $errors[] = "Pickup address is required.";
     }
-
     if (empty($delivery_address)) {
         $errors[] = "Delivery address is required.";
     }
@@ -68,7 +61,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $stmt = $conn->prepare("INSERT INTO parcels 
             (user_id, recipient_name, recipient_phone, parcel_name, weight, amount, pickup_address, delivery_address, status, created_at) 
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'Pending', NOW())");
-
         $stmt->bind_param("isssdsss", 
             $user_id, 
             $recipient_name, 
@@ -82,32 +74,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         if ($stmt->execute()) {
             $success = true;
+            header("Location: dashboard.php");
+            exit();
         } else {
             $errors[] = "Error booking parcel. Please try again.";
-        }
-
-        if ($success) {
-          // Redirect to dashboard after booking
-          header("Location: dashboard.php");
-          exit(); 
         }
 
         $stmt->close();
     }
 }
 
-
-// Fetch pickup addresses from the database
+// Fetch pickup addresses **only for logged-in user**
 $pickup_addresses = [];
-$address_query = "SELECT id, address_name FROM addresses ORDER BY address_name ASC";
-$result = $conn->query($address_query);
-
-if ($result) {
-    while ($row = $result->fetch_assoc()) {
-        $pickup_addresses[] = $row;
-    }
+$user_id = $_SESSION['user_id'];
+$stmt = $conn->prepare("SELECT id, address_name FROM addresses WHERE user_id = ? ORDER BY address_name ASC");
+$stmt->bind_param("i", $user_id);
+$stmt->execute();
+$result = $stmt->get_result();
+while ($row = $result->fetch_assoc()) {
+    $pickup_addresses[] = $row;
 }
-
+$stmt->close();
 $conn->close();
 ?>
 
@@ -133,11 +120,8 @@ $conn->close();
           colors: {
             primary: '#f97316',
             accent: '#f5f5f5',
-            sidebar: '#fff3e0',
             brand: '#f97316',
-            info: '#3b82f6',
             success: '#10b981',
-            cancelled: '#ef4444',
           }
         }
       }
@@ -158,7 +142,6 @@ $conn->close();
       <div class="bg-success text-white p-4 rounded-lg mb-6">
         ✅ Parcel booked successfully!
       </div> 
-    
     <?php endif; ?>
 
     <!-- Error Messages -->
@@ -214,17 +197,16 @@ $conn->close();
         <div class="grid gap-4">
           <label for="pickup_address" class="block text-sm font-medium text-gray-700">Pickup Address</label>
           <select id="pickup_address" name="pickup_address" class="block w-full px-4 py-2 border border-gray-300 rounded-lg bg-white text-gray-800 focus:ring-2 focus:ring-primary focus:outline-none appearance-none" required>
-    <option value="" disabled <?= empty($_POST['pickup_address']) ? 'selected' : '' ?>>Select Pickup Location</option>
-    <?php foreach ($pickup_addresses as $address): ?>
-        <option value="<?= htmlspecialchars($address['address_name']) ?>" <?= ($_POST['pickup_address'] ?? '') === $address['address_name'] ? 'selected' : '' ?>>
-            <?= htmlspecialchars($address['address_name']) ?>
-        </option>
-    <?php endforeach; ?>
-</select>
-
+            <option value="" disabled <?= empty($_POST['pickup_address']) ? 'selected' : '' ?>>Select Pickup Location</option>
+            <?php foreach ($pickup_addresses as $address): ?>
+              <option value="<?= htmlspecialchars($address['address_name']) ?>" <?= ($_POST['pickup_address'] ?? '') === $address['address_name'] ? 'selected' : '' ?>>
+                <?= htmlspecialchars($address['address_name']) ?>
+              </option>
+            <?php endforeach; ?>
+          </select>
         </div>
         <div>
-          <label for="delivery_address" class="block  pt-4 text-sm font-medium text-gray-700">Delivery Address</label>
+          <label for="delivery_address" class="block pt-4 text-sm font-medium text-gray-700">Delivery Address</label>
           <input type="text" id="delivery_address" name="delivery_address" value="<?= htmlspecialchars($_POST['delivery_address'] ?? '') ?>" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary" required />
         </div>
       </div>

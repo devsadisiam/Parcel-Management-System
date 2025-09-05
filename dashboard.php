@@ -23,7 +23,7 @@ $user_id = $_SESSION['user_id'];
 $totalQuery = $conn->query("SELECT COUNT(*) as total FROM parcels WHERE user_id=$user_id");
 $total = $totalQuery->fetch_assoc()['total'];
 
-$inTransitQuery = $conn->query("SELECT COUNT(*) as c FROM parcels WHERE user_id=$user_id AND status='Off to Deliver'");
+$inTransitQuery = $conn->query("SELECT COUNT(*) as c FROM parcels WHERE user_id = $user_id AND status IN ('Picked', 'Off to Deliver')");
 $inTransit = $inTransitQuery->fetch_assoc()['c'];
 
 $deliveredQuery = $conn->query("SELECT COUNT(*) as c FROM parcels WHERE user_id=$user_id AND status='Delivered'");
