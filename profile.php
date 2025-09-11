@@ -1,13 +1,6 @@
 <?php
 session_start();
-$host = "localhost";
-$db = "parcel_delivery";
-$user = "root";
-$pass = "";
-
-// Connect to DB
-$conn = new mysqli($host, $user, $pass, $db);
-if ($conn->connect_error) die("Connection failed: " . $conn->connect_error);
+require 'db_connect.php';
 
 // Get user ID from session
 $user_id = $_SESSION['user_id'] ?? 1; // default for testing

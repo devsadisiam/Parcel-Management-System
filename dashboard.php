@@ -8,14 +8,7 @@ if (!isset($_SESSION['user_id'])) {
 }
 
 // DB connection
-$host = "localhost";
-$username = "root";
-$db_password = ""; // your DB password
-$dbname = "parcel_delivery"; // change if needed
-$conn = new mysqli($host, $username, $db_password, $dbname);
-if ($conn->connect_error) {
-    die("DB connection failed!");
-}
+require 'db_connect.php';
 
 $user_id = $_SESSION['user_id'];
 

@@ -2,13 +2,7 @@
 session_start();
 
 // DB connection
-$host = "localhost";
-$username = "root";
-$db_password = "";
-$dbname = "parcel_delivery";
-
-$conn = new mysqli($host, $username, $db_password, $dbname);
-if ($conn->connect_error) die("Database connection failed!");
+require 'db_connect.php';
 
 // --------------------
 // Admin Access Check

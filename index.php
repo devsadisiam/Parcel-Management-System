@@ -1,12 +1,6 @@
 <?php
 session_start();
-$host = "localhost";
-$username = "root";
-$db_password = "";
-$dbname = "parcel_delivery";
-
-$conn = new mysqli($host, $username, $db_password, $dbname);
-if ($conn->connect_error) die("Database connection failed!");
+require 'db_connect.php';
 
 // Check if user is logged in
 if (isset($_SESSION['user_id'])) {
