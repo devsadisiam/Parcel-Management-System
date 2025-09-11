@@ -150,11 +150,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['delete_address_id']))
 
 
 // Fetch parcel summary for the logged-in user
+
 $summary_sql = "SELECT 
     COUNT(*) AS total,
-    SUM(CASE WHEN status = 'Delivered' THEN 1 ELSE 0 END) AS delivered,
-    SUM(CASE WHEN status IN ('Picked','Off to Deliver') THEN 1 ELSE 0 END) AS in_transit,
-    SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END) AS cancelled
+    COALESCE(SUM(CASE WHEN status = 'Delivered' THEN 1 ELSE 0 END), 0) AS delivered,
+    COALESCE(SUM(CASE WHEN status IN ('Picked','Off to Deliver') THEN 1 ELSE 0 END), 0) AS in_transit,
+    COALESCE(SUM(CASE WHEN status = 'Cancelled' THEN 1 ELSE 0 END), 0) AS cancelled
 FROM parcels
 WHERE user_id = ?";
 

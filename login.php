@@ -13,17 +13,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = "Invalid email format!";
     } else {
-        $host = "localhost";
-        $username = "root";
-        $db_password = ""; // your DB password
-        $dbname = "parcel_delivery"; // change this
+        require 'db_connect.php'; 
 
-        $conn = new mysqli($host, $username, $db_password, $dbname);
-
-        if ($conn->connect_error) {
-            $error = "Database connection failed!";
-        } else {
-            $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
+         $stmt = $conn->prepare("SELECT id, password FROM users WHERE email = ?");
             $stmt->bind_param("s", $email);
             $stmt->execute();
             $stmt->store_result();
@@ -36,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $_SESSION['user_id'] = $user_id;
                     $success = "Login successful! Redirecting...";
                     if ($user_id == 2) {
-                      echo "hello";
                         echo "<script>setTimeout(() => { window.location.href = 'admin.php'; }, 2000);</script>";
                     } else {
                         echo "<script>setTimeout(() => { window.location.href = 'dashboard.php'; }, 2000);</script>";
@@ -50,7 +41,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $stmt->close();
             $conn->close();
-        }
     }
 }
 ?>
